@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Heroku App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .info-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #api-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Ứng dụng Heroku của tôi</h1>
+        
+        <div class="info-card">
+            <h2>Chào mừng!</h2>
+            <p>Đây là một ứng dụng web đơn giản được triển khai trên Heroku.</p>
+            <p>Ứng dụng này được xây dựng với:</p>
+            <ul>
+                <li>Node.js & Express.js</li>
+                <li>HTML, CSS, JavaScript</li>
+                <li>Heroku CLI</li>
+                <li>Git</li>
+            </ul>
+        </div>
+
+        <div class="info-card">
+            <h2>Kiểm tra API</h2>
+            <button onclick="fetchApiInfo()">Gọi API /api/info</button>
+            <div id="api-result"></div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchApiInfo() {
+            try {
+                const response = await fetch('/api/info');
+                const data = await response.json();
+                const resultDiv = document.getElementById('api-result');
+                resultDiv.innerHTML = `
+                    <h3>Kết quả API:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Lỗi:', error);
+                alert('Có lỗi xảy ra khi gọi API');
+            }
+        }
+    </script>
+</body>
+</html>
