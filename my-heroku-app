@@ -1,1 +1,59 @@
+pipeline {
+  agent any
+
+  environment {
+    REGISTRY    = 'docker.io/your-docker-user'
+    IMAGE_NAME  = "${REGISTRY}/my-heroku-app"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git url: 'https://github.com/JAVELIN123/my-heroku-app.git',
+            branch: 'main',
+            credentialsId: 'github-token'
+      }
+    }
+
+    stage('Build & Test') {
+      steps {
+        // nếu là Node.js
+        // sh 'npm install'
+        // sh 'npm test'
+        //
+        // nếu là Maven/Java
+        // sh 'mvn clean package -DskipTests'
+      }
+    }
+
+    stage('Docker Build & Push') {
+      steps {
+        script {
+          docker.withRegistry('', 'dockerhub-credentials-id') {
+            def img = docker.build("${IMAGE_NAME}:${env.BUILD_NUMBER}")
+            img.push()
+            img.push('latest')
+          }
+        }
+      }
+    }
+
+    stage('Deploy to Heroku') {
+      steps {
+        // Ví dụ dùng Heroku CLI
+        // withCredentials([string(credentialsId: 'heroku-api-key', variable: 'HEROKU_API_KEY')]) {
+        //   sh 'heroku container:login'
+        //   sh "docker tag ${IMAGE_NAME}:latest registry.heroku.com/${HEROKU_APP_NAME}/web"
+        //   sh "docker push registry.heroku.com/${HEROKU_APP_NAME}/web"
+        //   sh "heroku container:release web --app ${HEROKU_APP_NAME}"
+        // }
+      }
+    }
+  }
+
+  post {
+    success { echo '✅ Pipeline thành công!' }
+    failure { echo '❌ Pipeline thất bại.' }
+  }
+}
 
