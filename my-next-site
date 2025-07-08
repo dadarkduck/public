@@ -31,4 +31,9 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-          sh 'kubectl --kubeconfig=$KUBECONFIG set image deployment/flask-deploy flask-container=$IMAGE:$TAG -n default
+          sh 'kubectl --kubeconfig=$KUBECONFIG set image deployment/flask-deploy flask-container=$IMAGE:$TAG -n default'
+        }
+      }
+    }
+  }
+}
