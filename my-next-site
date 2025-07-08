@@ -1,1 +1,32 @@
+pipeline {
+  agent any
+
+  environment {
+    REGISTRY = 'myregistry.example.com'
+    IMAGE    = "${REGISTRY}/my-next-site"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git url: 'https://github.com/YOUR_USER/my-next-site.git', branch: 'main'
+      }
+    }
+
+    stage('Build & Push Docker') {
+      steps {
+        sh "docker build -t ${IMAGE}:${BUILD_NUMBER} ."
+        sh "docker push ${IMAGE}:${BUILD_NUMBER}"
+      }
+    }
+
+    stage('Deploy to K8s') {
+      steps {
+        withCredentials([file(credentialsId: 'kubeconfig-secret', variable: 'KUBECONFIG')]) {
+          sh "kubectl --kubeconfig=$KUBECONFIG set image deployment/my-next-site-deploy my-next-site=${IMAGE}:${BUILD_NUMBER} -n default"
+        }
+      }
+    }
+  }
+}
 
