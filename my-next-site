@@ -2,31 +2,33 @@ pipeline {
   agent any
 
   environment {
-    REGISTRY = 'myregistry.example.com'
-    IMAGE    = "${REGISTRY}/my-next-site"
+    IMAGE = "yourdockerhub/flask-app"
+    TAG = "${BUILD_NUMBER}"
   }
 
   stages {
     stage('Checkout') {
       steps {
-        git url: 'https://github.com/YOUR_USER/my-next-site.git', branch: 'main'
+        git url: 'https://github.com/JAVELIN123/public.git', branch: 'main'
       }
     }
 
-    stage('Build & Push Docker') {
+    stage('Build Docker') {
       steps {
-        sh "docker build -t ${IMAGE}:${BUILD_NUMBER} ."
-        sh "docker push ${IMAGE}:${BUILD_NUMBER}"
+        sh 'docker build -t $IMAGE:$TAG .'
       }
     }
 
-    stage('Deploy to K8s') {
+    stage('Push Docker') {
       steps {
-        withCredentials([file(credentialsId: 'kubeconfig-secret', variable: 'KUBECONFIG')]) {
-          sh "kubectl --kubeconfig=$KUBECONFIG set image deployment/my-next-site-deploy my-next-site=${IMAGE}:${BUILD_NUMBER} -n default"
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+          sh 'echo $PASSWORD | docker login -u $USERNAME --password-stdin'
+          sh 'docker push $IMAGE:$TAG'
         }
       }
     }
-  }
-}
 
+    stage('Deploy to Kubernetes') {
+      steps {
+        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+          sh 'kubectl --kubeconfig=$KUBECONFIG set image deployment/flask-deploy flask-container=$IMAGE:$TAG -n default
